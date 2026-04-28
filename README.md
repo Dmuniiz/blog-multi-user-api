@@ -12,7 +12,7 @@ Lombok <br>
 Docker <br>
 Maven <br>
 
-## 🔐 Features
+## Features
 JWT-based authentication with login and registration endpoints <br>
 Spring Security filter chain to secure all protected routes <br>
 Stateless request handling with custom JWT extraction and validation <br>
@@ -26,21 +26,16 @@ Automatic reading time calculation <br>
 DTOs used for requests, responses, and internal data transfer <br>
 MapStruct for clean mapping between DTOs and entities <br>
 Clean modular folder structure following best practices <br>
-Dockerized setup for database and local development <br>
 
-## 🐳 Docker Support
-Docker is used for a containerized PostgreSQL setup and ease of development. <br>
-Make sure Docker is installed and running. <br>
-
-## 🤫 Secrets & Passwords
+## Secrets & Passwords
 Before running, make sure that you have 2 environment variables set up: DB_USER, DB_PASSWORD (I have set them up using a .env file) <br>
 These are needed in docker-compose.yml & src > main > resources > application.properties
 <br>
-## 👤 User creation
+## User creation
 To create new users access this file: <br> src > main > java > com...Blog_Platgorm > config > SecurityConfig.java > userDetailsService
 Enter the email or password according to your wish and run the application to save it into your database
 
-## 💻 Frontend
+## Frontend
 To run the frontend navigate to frontend directory in your terminal then do these 2 steps:  <br>
 npm install (ignore the warnings) <br>
 npm run dev
