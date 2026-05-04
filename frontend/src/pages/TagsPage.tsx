@@ -217,13 +217,8 @@ const TagsPage: React.FC<TagsPageProps> = ({ isAuthenticated }) => {
             <Button variant="flat" onClick={handleModalClose}>
               Cancel
             </Button>
-            <Button
-              color="primary"
-              onClick={handleAddTags}
-              isLoading={isSubmitting}
-              isDisabled={newTags.length === 0}
-            >
-              Add Tags
+            <Button color="primary" onClick={handleAddTags} isLoading={isSubmitting} isDisabled={newTags.length === 0 || isSubmitting}>
+              Create {newTags.length > 0 ? `(${newTags.length})` : ''}
             </Button>
           </ModalFooter>
         </ModalContent>

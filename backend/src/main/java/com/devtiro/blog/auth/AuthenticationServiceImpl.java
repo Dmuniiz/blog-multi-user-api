@@ -1,13 +1,12 @@
 package com.devtiro.blog.auth;
 
+import com.devtiro.blog.users.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -21,20 +20,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserDetailsService userDetailsService;
-
     @Value("\"${jwt.secret}\"")
     private String secretKey;
 
     private final Long jwtExpiryMs = 86400000L;
 
-    @Override
-    public UserDetails authenticate(String email, String password) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-
-        return userDetailsService.loadUserByUsername(email);
-    }
+    private final UserService userService;
 
     @Override
     public String generateToken(UserDetails userDetails) {
@@ -52,7 +43,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public UserDetails validateToken(String token){
         var username = extractUsername(token);
-        return userDetailsService.loadUserByUsername(username);
+        var user = userService.loadUserByUsername(username);
+        return user;
     }
 
     private String extractUsername(String token){

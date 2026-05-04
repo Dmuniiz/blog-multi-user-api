@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,9 +46,8 @@ public class PostController {
     }
 
     @GetMapping("/drafts")
-    public ResponseEntity<List<PostResponse>> getDrafts(@RequestAttribute UUID userId){
-        User loggedIdUser = userService.getUserById(userId);
-        List<Post> draftPosts = postService.getDraftPosts(loggedIdUser);
+    public ResponseEntity<List<PostResponse>> getDrafts(@AuthenticationPrincipal User user){
+        List<Post> draftPosts = postService.getDraftPosts(getLoggedInUser(user.getId()));
 
         List<PostResponse> postResponses = draftPosts.stream().map(postMapper::toDto).toList();
 
@@ -55,10 +55,9 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponse> createPost(@Valid @RequestBody CreatePostRequestDto createPostRequestDto, @RequestAttribute UUID userId ){
-        User loggedInUser = userService.getUserById(userId);
+    public ResponseEntity<PostResponse> createPost(@Valid @RequestBody CreatePostRequestDto createPostRequestDto, @AuthenticationPrincipal User user ){
         CreatePostRequest createPost = postMapper.toCreatePostRequest(createPostRequestDto);
-        Post createdPost = postService.createPost(loggedInUser, createPost);
+        Post createdPost = postService.createPost(getLoggedInUser(user.getId()), createPost);
         PostResponse createdPostResponse = postMapper.toDto(createdPost);
 
         return new ResponseEntity<>(createdPostResponse, HttpStatus.CREATED);
@@ -84,5 +83,9 @@ public class PostController {
     public ResponseEntity<Void> deletePost(@PathVariable UUID id){
         postService.deletePost(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private User getLoggedInUser(UUID id){
+       return userService.getUserById(id);
     }
 }

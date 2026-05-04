@@ -3,6 +3,7 @@ package com.devtiro.blog.config.security;
 import com.devtiro.blog.auth.AuthenticationService;
 import com.devtiro.blog.users.User;
 import com.devtiro.blog.users.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,21 +20,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationService authenticationService){
-        return new JwtAuthenticationFilter(authenticationService);
-    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> authorize
                         //.requestMatchers("/messages/**").access(hasScope("message:read"))
                         .requestMatchers("/v3/api-docs/**","/swagger-ui.html","/swagger-ui/**").permitAll()
@@ -45,8 +46,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -59,25 +58,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository) {
-        BlogUserDetailsService blogUserDetailsService = new BlogUserDetailsService(userRepository);
-
-        String email = "user@gmail.com";
-
-        userRepository.findByEmail(email).orElseGet(()-> {
-
-            User newUser =
-                    User.builder()
-                    .name("Test User")
-                    .email(email)
-                    .password(passwordEncoder().encode("password123"))
-                    .build();
-
-            return userRepository.save(newUser);
-
-        });
-
-        return blogUserDetailsService;
+    public UserDetailsService userDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        return username -> {
+           return userRepository.findByEmailIgnoreCase(username)
+                    .orElseGet(() -> {
+                        User userDefault = User.builder()
+                                .name("Test User")
+                                .email(username)
+                                .password(passwordEncoder.encode("password123"))
+                                .build();
+                        return userRepository.save(userDefault);
+                    });
+        };
     }
 
 }

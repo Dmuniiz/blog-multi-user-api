@@ -10,12 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationService authenticationService;
@@ -24,34 +26,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        try {
-            String token = extractToken(request);
+        String header = request.getHeader("Authorization");
 
-            if(token != null){
-                UserDetails userDetails = authenticationService.validateToken(token);
+        if(header == null || !header.startsWith("Bearer ")){
+            filterChain.doFilter(request,response);
+        }else{
+            try {
+                String token = extractTokenBearer(header);
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
+                if(token != null && !token.isBlank()){
+                    var userDetails = authenticationService.validateToken(token);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
 
-                if(userDetails instanceof BlogUserDetails){
-                    request.setAttribute("userId", ((BlogUserDetails) userDetails).getId());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
+            }catch (Exception e){
+                log.warn("Received invalid auth token");
+                throw new RuntimeException("Invalid token" + e.getMessage());
             }
-        }catch (Exception e){
-            log.warn("Received invalid auth token");
+            filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
-
     }
 
-    private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-
+    private String extractTokenBearer(String bearerToken) {
         if(bearerToken != null && bearerToken.startsWith("Bearer ")){
             return bearerToken.substring(7);
         }
