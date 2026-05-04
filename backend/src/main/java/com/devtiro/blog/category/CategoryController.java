@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +39,16 @@ public class CategoryController {
                 categoryMapper.toDto(savedCategory),
                 HttpStatus.CREATED //201 status for successful
         );
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable("id") UUID categoryId, @Valid @RequestBody CreateCategoryRequest createCategoryRequest){
+        var category = categoryService.getCategoryById(categoryId);
+
+        var updatedCategory = categoryService.updateCategory(category, createCategoryRequest.getName());
+        var mappedCategory = categoryMapper.toDto(updatedCategory);
+
+        return ResponseEntity.ok(mappedCategory);
     }
 
     @DeleteMapping("/{id}")

@@ -13,4 +13,5 @@ public interface CategoryService {
 
     Category getCategoryById(UUID id);
 
+    Category updateCategory(Category category, String name);
 }

@@ -1,0 +1,32 @@
+services:
+  db-blog:
+    image: postgres:16-alpine
+    container_name: db-container
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app-blog:
+    build: ./backend
+    container_name: blog-app-container
+    environment:
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-blog:5432/postgres
+    depends_on:
+      - db-blog
+
+  frontend-blog:
+    build: ./frontend
+    container_name: blog-front-container
+    ports:
+      - "3000:80" # Você acessará o site em http://localhost:3000
+    depends_on:
+      - app-blog
+
+volumes:
+  pgdata:

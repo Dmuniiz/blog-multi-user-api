@@ -53,4 +53,10 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
     }
+
+    @Override
+    public Category updateCategory(Category category, String name) {
+        category.setName(name);
+        return categoryRepository.save(category);
+    }
 }
