@@ -1,42 +1,62 @@
-# Blog Platform (Java + Spring Boot)
-A secure and structured backend application for a multi-user blog platform. Built using Java 21 and Spring Boot, this project focuses on authentication, clean architecture, and well-documented code.
+# 📝 Blog Platform
+
+A robust and secure multi-user blog platform built with a modular and modern architecture. This project features a **Java 21** and **Spring Boot** backend, paired with a dynamic **React** frontend served via **Nginx**, all orchestrated using **Docker**.
 
 ## 🛠 Tech Stack
-Java 21 <br>
-Spring Boot <br>
-Spring Security + JWT <br>
-Spring Data JPA <br>
-PostgreSQL <br>
-MapStruct Lib <br>
-Lombok <br>
-Docker <br>
-Maven <br>
 
-## Features
-JWT-based authentication with login and registration endpoints <br>
-Spring Security filter chain to secure all protected routes <br>
-Stateless request handling with custom JWT extraction and validation <br>
-Global Exception Handling for better error messaging and control <br><br>
-Support for multiple users: <br>
-Create, edit, and delete blog posts <br>
-Save drafts or publish blogs <br>
-Assign a category to each blog <br>
-Add up to 10 tags per blog <br><br>
-Automatic reading time calculation <br>
-DTOs used for requests, responses, and internal data transfer <br>
-MapStruct for clean mapping between DTOs and entities <br>
-Clean modular folder structure following best practices <br>
+*   **Backend:** Java 21, Spring Boot 3, Spring Security, JWT, Spring Data JPA, Hibernate, MapStruct, Lombok, Maven.
+*   **Frontend:** React, Vite, TypeScript.
+*   **Infrastructure:** Docker, Docker Compose, Nginx.
+*   **Database:** PostgreSQL 16.
 
-## Secrets & Passwords
-Before running, make sure that you have 2 environment variables set up: DB_USER, DB_PASSWORD (I have set them up using a .env file) <br>
-These are needed in docker-compose.yml & src > main > resources > application.properties
-<br>
-## User creation
-To create new users access this file: <br> src > main > java > com...Blog_Platgorm > config > SecurityConfig.java > userDetailsService
-Enter the email or password according to your wish and run the application to save it into your database
+## 🚀 Getting Started
 
-## Frontend
-To run the frontend navigate to frontend directory in your terminal then do these 2 steps:  <br>
-npm install (ignore the warnings) <br>
-npm run dev
+The simplest way to run the entire stack (Frontend, Backend, and Database) is using **Docker Compose**, which automatically configures all networking and dependencies.
 
+### 📋 Prerequisites
+*   [Docker Desktop](https://docker.com) installed and running.
+
+### 🛠️ Step-by-Step Setup
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com
+    cd your-repository
+    ```
+
+2.  **Environment Variables:**
+    The project requires `DB_USERNAME` and `DB_PASSWORD`. These are pre-configured in the `docker-compose.yml` file with default values, but you can override them by creating a `.env` file in the root directory.
+
+3.  **Run the application:**
+    Execute the following command in the project root:
+    ```bash
+    docker compose up --build -d
+    DB_USERNAME=postgres
+    DB_PASSWORD=admin
+    ```
+
+4.  **Access the Platform:**
+    *   **Frontend (UI):** [http://localhost:3000](http://localhost:3000)
+    *   **Backend (API):** [http://localhost:8888](http://localhost:8888)
+
+> **Note:** The database initializes automatically. Thanks to the `hibernate.ddl-auto=update` configuration, all tables are created on the first boot without requiring manual SQL scripts.
+
+## 🔑 Authentication & Security
+
+*   **JWT Auth:** Uses **JSON Web Tokens** for secure, stateless authentication.
+*   **User Provisioning:** You can set up initial users for testing in:
+    `src/main/java/com/.../config/SecurityConfig.java` within the `userDetailsService` method.
+*   **Route Protection:** All write operations (POST, PUT, DELETE) require a valid JWT token in the Authorization header.
+
+## 📝 Key Features
+
+*   **Post Management:** Create, edit, delete, and save drafts or publish blogs.
+*   **Organization:** Categorization and tagging support (up to 10 tags per post).
+*   **Reading Time:** Automatically calculates the estimated reading time for each article.
+*   **Clean Architecture:** Utilization of DTOs and MapStruct to ensure database entities are never directly exposed.
+*   **Reverse Proxy:** Nginx manages frontend requests and proxies API calls to the backend, eliminating CORS issues and improving performance.
+
+## 🔍 Useful Commands
+
+*   **View live logs:** `docker compose logs -f`
+*   **Stop the application:** `docker compose stop`
+*   **Full cleanup (removes containers & volumes):** `docker compose down -v`
